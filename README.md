@@ -8,8 +8,8 @@ This repository provides an end-to-end PyTorch implementation of **Cycle-Consist
 
 - **From-Scratch Implementation**: Custom implementations of ResNet-based Generators (9 residual blocks, InstanceNorm, Reflection Padding) and 70x70 PatchGAN Discriminators.
 - **Multi-Component Loss**: Full formulation of Least-Squares Adversarial Loss (LSGAN), Cycle Consistency Loss ($L_1$), and Identity Loss ($L_1$).
-- **Stabilized Training**: History replay buffers for generated images to prevent discriminator oscillation and mode collapse.
-- **Out-of-Distribution Generalization**: Zero-shot evaluation on unseen real-world photographs of Iranian Turkoman horses to assess texture transfer and domain adaptation.
+- **Training Support**: History replay buffers for generated images, following the standard CycleGAN training approach.
+- **Additional Qualitative Inputs**: Inference examples on photographs labeled as Iranian Turkoman horses.
 
 ---
 
@@ -39,7 +39,7 @@ $$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{GAN}}(G, D_Y, X, Y) + \mathcal
 
 - **Adversarial Loss (Least Squares GAN)**: Stabilizes training dynamics compared to standard negative log-likelihood.
 - **Cycle Consistency Loss ($\lambda_{\text{cycle}} = 10.0$)**: Penalizes $L_1$ reconstruction error between original and recovered images.
-- **Identity Loss ($\lambda_{\text{identity}} = 5.0$)**: Encourages generators to preserve color tone and background features when fed images already belonging to the target domain.
+- **Identity Loss (`LAMBDA_ID = 0.5` in the notebook)**: Encourages generators to preserve content when given images already belonging to the target domain.
 
 ---
 
@@ -59,7 +59,9 @@ $$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{GAN}}(G, D_Y, X, Y) + \mathcal
 
 ---
 
-## 🔬 Experimental Results
+## 🔬 Qualitative Results
+
+The committed notebook loads generator and discriminator checkpoints from epoch 70 for these figures. Checkpoint files are not stored in the repository, and no FID, KID, or other quantitative image-quality metric is reported.
 
 ### 1. Benchmark Test Set Evaluation (Horse $\rightarrow$ Zebra)
 The model translates coat textures, stripes, and contours from horse to zebra while keeping the background context (grass, sky, fences) intact:
@@ -68,8 +70,8 @@ The model translates coat textures, stripes, and contours from horse to zebra wh
 
 ---
 
-### 2. Generalization on Unseen Turkoman Horse Breeds
-To evaluate the model's out-of-distribution robustness, real images of **Iranian Turkoman horses** (not present in the training set) were passed through the trained generator ($G_{AB}$):
+### 2. Additional Turkoman Horse Inputs
+Photographs labeled as **Iranian Turkoman horses** were passed through the trained generator ($G_{AB}$). These examples are a qualitative inspection and do not establish out-of-distribution robustness:
 
 | Sample 1 | Sample 2 |
 | :---: | :---: |
@@ -90,6 +92,8 @@ To evaluate the model's out-of-distribution robustness, real images of **Iranian
 ```
 GAN_Image_Translation_Generation/
 ├── GAN_Implementation.ipynb   # Main notebook with architecture, training loop, and evaluation
+├── requirements.txt           # Python dependencies
+├── LICENSE                    # MIT License
 ├── README.md                  # Detailed project documentation
 └── results/                   # Extracted qualitative results and sample visualizations
     ├── dataset_samples.png
@@ -102,9 +106,11 @@ GAN_Image_Translation_Generation/
 ## 🚀 Quickstart & Usage
 
 ### Prerequisites
-Install PyTorch and required dependencies:
+Install the required dependencies:
 ```bash
-pip install torch torchvision pillow matplotlib
+python -m venv .venv
+source .venv/bin/activate  # Windows PowerShell: .venv\Scripts\Activate.ps1
+pip install -r requirements.txt
 ```
 
 ### Running the Notebook
@@ -113,3 +119,9 @@ Open `GAN_Implementation.ipynb` in Jupyter Notebook, JupyterLab, or Google Colab
 jupyter notebook GAN_Implementation.ipynb
 ```
 Follow the cells to inspect the architecture, train from scratch, or load saved checkpoints (`.pth`) for inference.
+
+Download and extract Horse2Zebra into `src/data/horse2zebra/`, or update `DATASET_ROOT`. To reproduce the committed result figures, provide the epoch-70 checkpoints under `src/Model/`; otherwise run training to create new checkpoints. The configured full run is 200 epochs and is GPU intensive.
+
+## License
+
+Released under the [MIT License](LICENSE).
